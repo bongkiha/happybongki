@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="vue.js"></script>
+  <script src="/VUE课堂/417/marked.js"></script>
+  <script src="/VUE课堂/417/moment.js"></script>
+  <link rel="stylesheet" href="417/font.css">
+
+</head>
+<style>
+  html {
+    font-size: 4px;
+  }
+
+  .father {
+    display: flex;
+    height: 70vh;
+    justify-content: space-around;
+    padding-top: 25rem;
+  }
+
+  .left {
+    overflow-x: hidden;
+    width: 20%;
+    background-color: rgb(247, 248, 245);
+
+  }
+
+  .center {
+    /* height: auto; */
+    width: 40%;
+    position: relative;
+    background-color: aliceblue;
+  }
+
+  .right {
+    width: 40%;
+    font-size: 6rem;
+    height: 70vh;
+    background-color: rgb(254, 254, 254);
+  }
+
+  /* 左边列表 */
+  ul {
+    width: 90%;
+    background-color: rgb(62, 183, 130);
+    padding: 15px;
+    margin-top: 20px;
+  }
+
+  .add {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .add>button {
+    width: 40%;
+    height: 50px;
+    font-size: 20px;
+    font-weight: bolder;
+    color: aliceblue;
+    background-color: rgb(62, 183, 130);
+    border: 0;
+  }
+
+  button {
+    border-radius: 3px;
+  }
+
+  ul>li {
+    display: flex;
+    justify-content: space-between;
+
+  }
+
+  ul>li>.name {
+    list-style: none;
+    font-weight: bolder;
+    line-height: 27.33px;
+    color: rgb(241, 234, 233);
+    font-size: 4rem;
+    /* padding-left: 40px; */
+    border-radius: 20px;
+  }
+
+  .select:hover {
+    background-color: rgb(34, 202, 236);
+  }
+
+  /* 中间 */
+  .head {
+    display: flex;
+    padding-bottom: 1rem;
+  }
+
+  input {
+    background-color: rgb(237, 251, 242);
+    border: 1px solid rgb(62, 183, 130);
+    border-radius: 1rem;
+    margin-left: 2rem;
+  }
+
+  .head>button {
+    margin-left: 2rem;
+    background-color: rgb(62, 183, 130);
+    color: rgb(241, 227, 29);
+    border: 0;
+  }
+
+  .count {
+    margin-left: 30px;
+    font-weight: bolder;
+    font-size: 4rem;
+    line-height: 30px;
+  }
+
+  /* icon */
+  .material-icons {
+    width: 15px;
+    padding-right: 10px;
+  }
+
+  textarea {
+    min-width: 99%;
+    max-width: 99%;
+    min-height: 65vh;
+    max-height: 65.5vh;
+    font-size: 5rem;
+    border: 0;
+  }
+
+  /* 中间内容底部时间 */
+  .time {
+    position: absolute;
+    bottom: 0;
+    color: rgb(33, 156, 209);
+  }
+
+  .active {
+    background-color: rgb(34, 202, 236);
+    transform: scale(1.1);
+    transition: 0.8s;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <div class="father">
+      <!-- 左边 -->
+      <div class="left">
+        <!-- 添加笔记 -->
+        <div class="add">
+          <button @click="addNote">Add Note</button>
+          <button @click="sorceNotes">排序</button>
+        </div>
+        <!-- 列表   -->
+        <div class="list">
+          <ul v-for="(item,index) in notes" :key="index" class="select" :class="{active:currentIndex===index }"
+            @click="selectNote(index)">
+            <li>
+              <div class="name">{{item.title}}</div>
+              <div class="icon">
+                <i class="material-icons" v-show="notes[index].favorite==true">star_boder</i>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- 中间 -->
+      <div class="center">
+        <div class="head">
+          <input type="text" v-model="notes[currentIndex].title">
+          <!-- //收藏 -->
+          <button @click="favoriteNote"><i class="material-icons">star_boder</i> </button>
+          <!-- 删除 -->
+          <button @click="removeNote"><i class="material-icons">delete</i></button>
+          <div class="count">字数:{{ conterNum }}</div>
+          <div class="count"> 行数:{{lines}}</div>
+        </div>
+        <div class="content">
+          <textarea name="" id="" cols="30" rows="10" v-on:keyup="count()"
+            v-model="notes[currentIndex].content"></textarea>
+        </div>
+        <i class="time">{{time}}</i>
+      </div>
+      <!-- 右边 -->
+      <div class="right">
+        <div class="" v-html="notePreview"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          notes: [{
+            title: 'New Note1',
+            content: '**Hi!** This notebook is using [markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) for formatting!',
+            favorite: false,
+          }],
+          name: '',
+          currentIndex: 0,
+          conterNum: 0,
+          cInput: false,
+        }
+      },
+      computed: {
+        notePreview() {
+          return marked(this.notes[this.currentIndex].content)
+        },
+        countLine() { },
+        formaDate() { },
+        lines() {
+          if (this.notes[this.currentIndex].content) {
+            return this.notes[this.currentIndex].content.split(/\r\n|\r|\n/).length
+          }
+        },
+        time() {
+          return moment()
+        }
+      },
+      watch: {
+        notes: {
+          handler(newValue) {
+            localStorage.setItem('notes', JSON.stringify(newValue))
+          },
+          deep: true
+        }
+      },
+      mounted() {
+        if (localStorage.getItem('notes') != null) {
+          this.notes = JSON.parse(localStorage.getItem('notes'));
+        }
+      },
+      methods: {
+        // 增
+        addNote() {
+          const time = Date.now()
+          const note = {
+            id: String(time),
+            title: 'New note' + (this.notes.length + 1),
+            content: '**Hi!** This notebook is using [markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) for formatting!',
+            created: time,
+            favorite: false,
+            clickSelect: ''
+          }
+          this.notes.push(note)
+        },
+        // 选中
+        selectNote(index) {
+          this.currentIndex = index
+        },
+        // 收藏
+        favoriteNote() {
+          this.notes[this.currentIndex].favorite ^= true
+        },
+        // 删
+        removeNote() {
+          if (this.notes[this.currentIndex] && confirm('Delete the note')) {
+            const index = this.notes[this.currentIndex]
+            if (index !== -1) {
+              this.notes.splice(index, 1)
+            }
+          }
+        },
+        // 计数
+        count() {
+          let self = this;
+          if (self.cInput == false) {
+            self.conterNum = self.notes[this.currentIndex].content.length;
+            this.cInput = true;
+            this.cInput = false;
+          }
+        },
+        // 排序
+        sorceNotes() {
+          // this.notes[this.currentIndex].favorite = true
+          var star = this.notes.splice(this.currentIndex, 1)
+          this.notes.unshift(star[0])
+          this.currentIndex = 0
+        }
+
+
+
+
+      },
+
+
+    })
+  </script>
+</body>
+
+</html>
